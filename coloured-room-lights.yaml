@@ -1,0 +1,120 @@
+alias: Coloured Room Lights
+sequence:
+  - variables:
+      settings: >-
+        {%- macro pick_hue(s = -1, c = undefined) -%}
+          {%- if c is not defined -%}
+            {%- set c = (range(0,36000) | random) / 100 -%}
+          {%- endif -%}
+          {%- if s|int(0) > 0 -%}
+            {%- set c = ((range((c|int(0))*100,((c|int(0))*100)+((s|int(0))*200)) | random) / 100) - (s|int(0)) -%}
+            {%- if c <= 0 -%}
+              {%- set c = 360 + c -%}
+            {%- elif c > 360 -%}
+              {%- set c = c - 360 -%}
+            {%- endif -%}
+          {%- endif -%}
+          {{ c }}
+        {%- endmacro -%}
+
+        {%- macro pick_saturation(s = -1, c = undefined) -%}
+          {%- if c is not defined -%}
+            {%- set c = (range(3000,10000) | random) / 100 -%}
+          {%- endif -%}
+          {%- if s|int(0) > 0 -%}
+            {%- set c = ((range((c|int(0))*100,((c|int(0))*100)+((s|int(0))*200)) | random) / 100) - (s|int(0)) -%}
+            {%- if c < 0 -%}
+              {%- set c = c | abs -%}
+            {%- elif c >= 100 -%}
+              {%- set c = (100 - (c - 100)) | abs -%}
+            {%- endif -%}
+          {%- endif -%}
+          {{ c }}
+        {%- endmacro -%}
+
+        {%- macro pick_brightness(s = -1, c = undefined) -%}
+          {%- if c is not defined -%}
+            {%- set c = (range(15000,25500) | random) / 100 -%}
+          {%- endif -%}
+          {%- if s|int(0) > 0 -%}
+            {%- set c = ((range((c|int(0))*100,((c|int(0))*100)+((s|int(0))*200)) | random) / 100) - (s|int(0)) -%}
+            {%- if c < 0 -%}
+              {%- set c = c | abs -%}
+            {%- elif c >= 255 -%}
+              {%- set c = (255 - (c - 255)) | abs -%}
+            {%- endif -%}
+          {%- endif -%}
+          {{ c }}
+        {%- endmacro -%}
+
+        {%- macro pick_colour_array(hs, ss, a = "") -%}
+          {%- if a != '' -%}
+            {%- set am = (a|string) | from_json -%}
+          {%- else -%}
+            {%- set am = [] -%}
+          {%- endif -%}
+          {%- if am | length > 0 -%}
+            {%- set c = am | random -%}
+            {%- set h = pick_hue(hs, (c[0]|int(0))) -%}
+            {%- set s = pick_saturation(ss, (c[1]|int(0))) -%}
+          {%- else -%}
+            {%- set h = pick_hue(hs) -%}
+            {%- set s = pick_saturation(ss) -%}
+          {%- endif -%}
+          {{ h }},{{ s }}
+        {%- endmacro -%}
+
+        {%- macro pick_hs(lights, h, s, b, hs, ss, bs, cs) -%}
+          {%- for light in lights -%}
+              {%- if cs is defined -%}
+                "{{- light -}}": {"state":"on","hs_color": [ {{- pick_colour_array(hs, ss, cs) -}} ],"brightness": {{- pick_brightness(bs, b) -}}},
+              {%- else -%}
+                "{{- light -}}": {"state":"on","hs_color": [ {{- pick_hue(hs, h) -}}, {{- pick_saturation(ss, s) -}} ],"brightness": {{- pick_brightness(bs, b) -}}},
+              {%- endif -%}
+          {%- endfor -%}
+        {%- endmacro -%}
+
+        {%- macro breakdown_group(group) -%}
+          {%- if state_attr(group, 'is_hue_group') -%}
+            {%- set entities = state_attr(group, 'lights') | map('lower') | map('regex_replace', '^(.*)', 'light.\\1') -%}
+          {%- elif state_attr(group, 'entity_id') is not none -%}
+            {%- set entities = state_attr(group, 'entity_id') | map('lower') | list -%}
+          {%- else -%}
+            {%- set entities = expand(group) | map(attribute='entity_id') | map('lower') -%}
+          {%- endif -%}
+          {{- entities | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- macro lights(list) -%}
+          {%- set t = namespace(lights = []) -%}
+          {%- if list is string -%}
+            {%- set list = list.split(',') -%}
+          {%- endif -%}
+          {%- for l in list -%}
+            {%- set t.lights = t.lights + breakdown_group(l).split(',') -%}
+          {%- endfor -%}
+          {{- t.lights | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- macro get_lights(include, exclude) -%}
+          {{- lights(include).split(',') | reject('in', lights(exclude).split(',')) | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- set exclude = exclude if exclude is defined else [] -%} {%- set
+        lights = (get_lights(room, exclude)).split(',') -%}
+
+        {%- set hue_spread = -1 if hue_spread is undefined else hue_spread -%}
+        {%- set saturation_spread = -1 if saturation_spread is undefined else
+        saturation_spread -%} {%- set brightness_spread = -1 if
+        brightness_spread is undefined else brightness_spread -%}
+
+        {{- ("{" + pick_hs(lights, hue, saturation, brightness, hue_spread,
+        saturation_spread, brightness_spread, colour_string)[:-1] + "}") |
+        from_json -}}
+  - service: scene.apply
+    data: >-
+      { {% if transition is defined %}"transition": {{ transition }},{% endif
+      %}"entities": {{ settings }} }
+mode: parallel
+icon: mdi:palette-outline
+max: 10
