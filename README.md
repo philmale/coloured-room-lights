@@ -1,7 +1,8 @@
 # coloured-room-lights
 Given a base colour these scripts will fill the room lights with that colour, but randomly assign slight deviations to the hue, saturation and brightness as specified by parameters. The effect is to give everything from a single colour to something like a disco scene at the other extreme.
 
-![IMG_5342](https://github.com/philmale/coloured-room-lights/assets/8235259/0333d708-e8e9-4499-add6-f53f0d49ae21)
+![IMG_5346](https://github.com/philmale/coloured-room-lights/assets/8235259/46be4af5-0eb1-4692-8890-b49f69d0365c)
+![IMG_5342](https://github.com/philmale/coloured-room-lights/assets/8235259/182568e0-6228-4abf-946c-d75349eda061)
 
 # Installation and Usage
 
