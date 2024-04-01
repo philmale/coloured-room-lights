@@ -47,6 +47,16 @@ That lets you use colour names rather than HS pairs - like this:
     brightness_spread: 30
     room: light.office
 ```
+or
+```
+  service: script.coloured_room_lights_named
+  data:
+    colour_string: "Red, White and Blue"
+    hue_spread: 20
+    brightness: 150
+    brightness_spread: 30
+    room: light.office
+```
 
 In order to use this though you need to have something to convert colour names into numbers.
 
