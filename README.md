@@ -3,7 +3,7 @@ Given a base colour these scripts will fill the room lights with that colour, bu
 
 ![IMG_5342](https://github.com/philmale/coloured-room-lights/assets/8235259/0333d708-e8e9-4499-add6-f53f0d49ae21)
 
-# Installation
+# Installation and Usage
 
 You can install the basic script simply by cutting and pasting it into the script editor in Home Assistant. 
 The basic script takes parameters to specify HSB settings for the base colour, and then 'spreads' that you want to randomly apply to each parameter (+ and - around the specified value, so a hue of 150 with a spread of 10 would give you hue's ranging from 140-160).
