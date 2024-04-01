@@ -1,0 +1,50 @@
+alias: Coloured Room Lights Named
+sequence:
+  - service: script.coloured_room_lights
+    data: |-
+      {
+        {%- from 'colour_map.jinja' import lookup_colour -%}
+        {% if include is defined %}
+        "include": {{ include }},
+        {% endif %}
+        {% if exclude is defined %}
+        "exclude": {{ exclude }},
+        {% endif %}
+        {% if brightness is defined %}
+        "brightness": {{ brightness }},
+        {% endif %}
+        {% if brightness_spread is defined %}
+        "brightness_spread": {{ brightness_spread }},
+        {% endif %}
+        {% if transition is defined %}
+        "transition": {{ transition }},
+        {% endif %}
+        {% if saturation is defined %}
+        "saturation": {{ saturation }},
+        {% endif %}
+        {% if hue is defined %}
+        "hue": {{ hue }},
+        {% endif %}
+        {% if saturation_spread is defined %}
+        "saturation_spread": {{ saturation_spread }},
+        {% endif %}
+        {% if hue_spread is defined %}
+        "hue_spread": {{ hue_spread }},
+        {% endif %}
+        {% if colour is defined %}
+          "hue": {{ lookup_colour(colour, 'hs').split(',')[0] }},
+          "saturation": {{ lookup_colour(colour, 'hs').split(',')[1] }},
+        {% endif %}
+        {% if colour_string is defined %}
+          {%- set colour_list = colour_string.replace(' and ', ',').split(',') | map('trim') | list -%}
+          {%- set colour_map = namespace(hs = []) -%}
+          {%- for c in colour_list -%}
+            {%- set colour_map.hs = colour_map.hs + [lookup_colour(c, 'hs').split(',')] -%}
+          {%- endfor -%}
+          "colour_string": {{ colour_map.hs | to_json }},
+        {% endif %}
+        "room": {{ room }}
+      }
+mode: parallel
+icon: mdi:palette-swatch-variant
+max: 10
