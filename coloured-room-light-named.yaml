@@ -39,7 +39,7 @@ sequence:
           {%- set colour_list = colour_string.replace(' and ', ',').split(',') | map('trim') | list -%}
           {%- set colour_map = namespace(hs = []) -%}
           {%- for c in colour_list -%}
-            {%- set colour_map.hs = colour_map.hs + [lookup_colour(c, 'hs').split(',')] -%}
+            {%- set colour_map.hs = colour_map.hs + [[lookup_colour(c, 'hs').split(',')[0] | int(0),lookup_colour(c, 'hs').split(',')[1] | int(0)]] -%}
           {%- endfor -%}
           "colour_string": {{ colour_map.hs | to_json }},
         {% endif %}
