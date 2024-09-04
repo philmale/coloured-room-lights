@@ -1,6 +1,6 @@
 alias: Coloured Room Lights Named
 sequence:
-  - service: script.coloured_room_lights
+  - action: script.coloured_room_lights
     data: |-
       {
         {%- from 'colour_map.jinja' import lookup_colour -%}
