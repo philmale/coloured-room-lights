@@ -111,7 +111,7 @@ sequence:
         {{- ("{" + pick_hs(lights, hue, saturation, brightness, hue_spread,
         saturation_spread, brightness_spread, colour_string)[:-1] + "}") |
         from_json -}}
-  - service: scene.apply
+  - action: scene.apply
     data: >-
       { {% if transition is defined %}"transition": {{ transition }},{% endif
       %}"entities": {{ settings }} }
